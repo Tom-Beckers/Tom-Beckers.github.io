@@ -1,155 +1,192 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>three.js webgl - custom attributes [lines];</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <style>
-        body {
-            color: #ffffff;
-            font-family: Monospace;
-            font-size: 13px;
-            text-align: center;
-            font-weight: bold;
-            background-color: #000000;
-            margin: 0px;
-            overflow: hidden;
-        }
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>three.js canvas - lines - sphere</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
 
-        #info {
-            color: #fff;
-            position: absolute;
-            top: 0px;
-            width: 100%;
-            padding: 5px;
-            z-index: 100;
-        }
-    </style>
-</head>
+			a {
+				color:#0078ff;
+			}
+		</style>
+	</head>
+	<body>
 
-<body>
-    <div id="info"><a href="http://threejs.org" target="_blank">three.js</a> - custom attributes example</div>
-    <div id="container"></div>
+		<script src="canvas_lines_sphere_data/three.js"></script>
 
-    <script src="Detector.js"></script>
-    <script src="stats.js"></script>
+		<script src="canvas_lines_sphere_data/Projector.js"></script>
+		<script src="canvas_lines_sphere_data/CanvasRenderer.js"></script>
 
-    <script src="three.js"></script>
+		<script>
 
-    <script type="x-shader/x-vertex" id="vertexshader">
-        uniform float amplitude;
-        attribute vec3 displacement;
-        attribute vec3 customColor;
-        varying vec3 vColor;
-        void main() {
-        vec3 newPosition = position + amplitude * displacement;
-        vColor = customColor;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
-        }
-    </script>
+			var SCREEN_WIDTH = window.innerWidth,
+			SCREEN_HEIGHT = window.innerHeight,
 
-    <script type="x-shader/x-fragment" id="fragmentshader">
-        uniform vec3 color;
-        uniform float opacity;
-        varying vec3 vColor;
-        void main() {
-        gl_FragColor = vec4( vColor * color, opacity );
-        }
-    </script>
+			mouseX = 0, mouseY = 0,
 
+			windowHalfX = window.innerWidth / 2,
+			windowHalfY = window.innerHeight / 2,
 
-    <script>
-		if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
-		var renderer, scene, camera, stats;
-		var object, uniforms;
-		var loader = new THREE.FontLoader();
-		loader.load( 'fonts/helvetiker_bold.typeface.json', function ( font ) {
-			init( font );
+			SEPARATION = 200,
+			AMOUNTX = 10,
+			AMOUNTY = 10,
+
+			camera, scene, renderer;
+
+			init();
 			animate();
-		} );
-		function init( font ) {
-			camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.position.z = 400;
-			scene = new THREE.Scene();
-			uniforms = {
-				amplitude: { value: 5.0 },
-				opacity:   { value: 0.3 },
-				color:     { value: new THREE.Color( 0xff0000 ) }
-			};
-			var shaderMaterial = new THREE.ShaderMaterial( {
-				uniforms:       uniforms,
-				vertexShader:   document.getElementById( 'vertexshader' ).textContent,
-				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-				blending:       THREE.AdditiveBlending,
-				depthTest:      false,
-				transparent:    true
-			});
-			var geometry = new THREE.TextGeometry( 'three.js', {
-				font: font,
-				size: 50,
-				height: 15,
-				curveSegments: 10,
-				bevelThickness: 5,
-				bevelSize: 1.5,
-				bevelEnabled: true,
-				bevelSegments: 10,
-				steps: 40
-			} );
-			geometry.center();
-			var vertices = geometry.vertices;
-			var buffergeometry = new THREE.BufferGeometry();
-			var position = new THREE.Float32BufferAttribute( vertices.length * 3, 3 ).copyVector3sArray( vertices );
-			buffergeometry.addAttribute( 'position', position );
-			var displacement = new THREE.Float32BufferAttribute( vertices.length * 3, 3 );
-			buffergeometry.addAttribute( 'displacement', displacement );
-			var customColor = new THREE.Float32BufferAttribute( vertices.length * 3, 3 );
-			buffergeometry.addAttribute( 'customColor', customColor );
-			var color = new THREE.Color( 0xffffff );
-			for( var i = 0, l = customColor.count; i < l; i ++ ) {
-				color.setHSL( i / l, 0.5, 0.5 );
-				color.toArray( customColor.array, i * customColor.itemSize );
+
+			function init() {
+
+				var container, separation = 100, amountX = 50, amountY = 50,
+				particles, particle;
+
+				container = document.createElement('div');
+				document.body.appendChild(container);
+
+				camera = new THREE.PerspectiveCamera( 75, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 10000 );
+				camera.position.z = 1000;
+
+				scene = new THREE.Scene();
+
+				renderer = new THREE.CanvasRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				container.appendChild( renderer.domElement );
+
+				// particles
+
+				var PI2 = Math.PI * 2;
+				var material = new THREE.SpriteCanvasMaterial( {
+
+					color: 0xffffff,
+					program: function ( context ) {
+
+						context.beginPath();
+						context.arc( 0, 0, 0.5, 0, PI2, true );
+						context.fill();
+
+					}
+
+				} );
+
+				for ( var i = 0; i < 1000; i ++ ) {
+
+					particle = new THREE.Sprite( material );
+					particle.position.x = Math.random() * 2 - 1;
+					particle.position.y = Math.random() * 2 - 1;
+					particle.position.z = Math.random() * 2 - 1;
+					particle.position.normalize();
+					particle.position.multiplyScalar( Math.random() * 10 + 450 );
+					particle.scale.multiplyScalar( 2 );
+					scene.add( particle );
+
+				}
+
+				// lines
+
+				for (var i = 0; i < 300; i++) {
+
+					var geometry = new THREE.Geometry();
+
+					var vertex = new THREE.Vector3( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+					vertex.normalize();
+					vertex.multiplyScalar( 450 );
+
+					geometry.vertices.push( vertex );
+
+					var vertex2 = vertex.clone();
+					vertex2.multiplyScalar( Math.random() * 0.3 + 1 );
+
+					geometry.vertices.push( vertex2 );
+
+					var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: Math.random() } ) );
+					scene.add( line );
+				}
+
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
 			}
-			object = new THREE.Line( buffergeometry, shaderMaterial );
-			object.rotation.x = 0.2;
-			scene.add( object );
-			renderer = new THREE.WebGLRenderer( { antialias: true } );
-			renderer.setClearColor( 0x050505 );
-			renderer.setPixelRatio( window.devicePixelRatio );
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			var container = document.getElementById( 'container' );
-			container.appendChild( renderer.domElement );
-			stats = new Stats();
-			container.appendChild( stats.dom );
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
 			//
-			window.addEventListener( 'resize', onWindowResize, false );
-		}
-		function onWindowResize() {
-			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.updateProjectionMatrix();
-			renderer.setSize( window.innerWidth, window.innerHeight );
-		}
-		function animate() {
-			requestAnimationFrame( animate );
-			render();
-			stats.update();
-		}
-		function render() {
-			var time = Date.now() * 0.001;
-			object.rotation.y = 0.25 * time;
-			uniforms.amplitude.value = Math.sin( 0.5 * time );
-			uniforms.color.value.offsetHSL( 0.0005, 0, 0 );
-			var attributes = object.geometry.attributes;
-			var array = attributes.displacement.array;
-			for ( var i = 0, l = array.length; i < l; i += 3 ) {
-				array[ i     ] += 0.3 * ( 0.5 - Math.random() );
-				array[ i + 1 ] += 0.3 * ( 0.5 - Math.random() );
-				array[ i + 2 ] += 0.3 * ( 0.5 - Math.random() );
+
+			function onDocumentMouseMove(event) {
+
+				mouseX = event.clientX - windowHalfX;
+				mouseY = event.clientY - windowHalfY;
 			}
-			attributes.displacement.needsUpdate = true;
-			renderer.render( scene, camera );
-		}
-    </script>
 
-</body>
+			function onDocumentTouchStart( event ) {
 
-</html>
+				if ( event.touches.length > 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			function onDocumentTouchMove( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			function render() {
+
+				camera.position.x += ( mouseX - camera.position.x ) * .05;
+				camera.position.y += ( - mouseY + 200 - camera.position.y ) * .05;
+				camera.lookAt( scene.position );
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script><div><canvas width="1290" height="742" style="width: 1290px; height: 742px;"></canvas></div>
+	
+
+</body></html>
