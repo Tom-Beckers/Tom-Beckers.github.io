@@ -19,9 +19,47 @@
 <h1 style="color:aquamarine">Tom Beckers </h1>
 <script src="canvas_lines_sphere_data/three.js"></script>
 
+<link href="StyleSheet2.css" rel="stylesheet" />   
+<link href="StyleSheet.css" rel="stylesheet" />
+<style>
+    body {
+          background-color: #fff;
+          margin: 0px;
+          overflow: hidden;
+          font-family:arial;
+          color:#fff;
+      }
+    h1{
+        margin:0;
+    }
+    a {
+        color:#0078ff;
+    }
+    #canvas{
+        width:100%;
+        height:700px;
+        overflow: hidden;
+        position:absolute;
+        top:0;
+        left:0;
+        background-color: #1a1724;               
+    }
+    .canvas-wrap{
+        position:relative;
+                
+    }
+    div.canvas-content{
+        position:relative;
+        z-index:2000;
+        color:#fff;
+        text-align:center;
+        padding-top:30px;
+    }
+</style>
+
 <script src="canvas_lines_sphere_data/Projector.js"></script>
 <script src="canvas_lines_sphere_data/CanvasRenderer.js"></script>
-
+    <script src="JavaScript2.js"></script>
 <script>
 
     var SCREEN_WIDTH = window.innerWidth,
@@ -199,9 +237,25 @@
     }
 
 </script>
-<div>
-    <canvas width="1290" height="742" style="height: 742px; width: 1290px;"></canvas>
+    
+
+
+    <canvas id="can" width="1290" height="742" style="height: 742px; width: 1290px;"></canvas>
+<div id="labelDiv" style="color: white;font-size:100px">Some text
+    <div  style="color: white;font-size:100px">Tom's text</div>
 </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
 
 
 </body>
