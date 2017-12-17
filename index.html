@@ -17,6 +17,102 @@
 </head>
 <body>
 <h1 style="color:aquamarine">Tom Beckers </h1>
+    
+    
+   
+       
+            <canvas id="layer1"
+                    style="opacity:0.5; z-index: 1;position:absolute;left:0px;" height="1000" width="400">
+                This text is displayed if your browser does not support HTML5 Canvas.
+            </canvas>
+
+            <canvas id="layer2"
+                    style="opacity:0.5;z-index: 2;position:absolute;left:0px;top:0px;" height="300" width="400">
+                This text is displayed if your browser does not support HTML5 Canvas.
+            </canvas>
+
+            <canvas id="layer3"
+                    style="opacity:0.5;z-index: 5;position:absolute;left:0px;top:0px;" height="300" width="400">
+                This text is displayed if your browser does not support HTML5 Canvas.
+            </canvas>
+      
+
+        <script type="text/javascript">
+            var layer1;
+            var layer2;
+            var layer3;
+            var ctx1;
+            var ctx2;
+            var ctx3;
+            var x = 400;
+            var y = 300;
+            var dx = 2;
+            var dy = 4;
+            var WIDTH = 400;
+            var HEIGHT = 300;
+            var city = new Image();
+
+            function init() {
+                city.src = "city.png";
+                layer1 = document.getElementById("layer1");
+                ctx1 = layer1.getContext("2d");
+                layer2 = document.getElementById("layer2");
+                ctx2 = layer2.getContext("2d");
+                layer3 = document.getElementById("layer3");
+                ctx3 = layer3.getContext("2d");
+                setInterval(drawAll, 20);
+            }
+
+            function drawAll() {
+                draw1();
+                draw2();
+                draw3();
+            }
+
+            function draw1() {
+                ctx1.clearRect(0, 0, WIDTH, HEIGHT);
+                ctx1.fillStyle = "#7dcaf6";
+                ctx1.beginPath();
+                ctx1.rect(0, 0, WIDTH, HEIGHT);
+                ctx1.closePath();
+                ctx1.fill();
+                ctx1.fillStyle = "#255998";
+                ctx1.beginPath();
+                ctx1.arc(x, y, 10, 0, Math.PI * 2, true);
+                ctx1.closePath();
+                ctx1.fill();
+
+                if (x + dx > WIDTH || x + dx < 0)
+                    dx = -dx;
+                if (y + dy > HEIGHT || y + dy < 0)
+                    dy = -dy;
+
+                x += dx;
+                y += dy;
+            }
+
+            function draw2() {
+                ctx2.clearRect(0, 0, WIDTH, HEIGHT);
+                ctx2.drawImage(city, 0, 0);
+            }
+
+            function draw3() {
+                ctx3.clearRect(0, 0, WIDTH, HEIGHT);
+                ctx3.fillStyle = "#FFFF00";
+                ctx3.save();
+                ctx3.translate(200, 200);
+                ctx3.rotate(x / 20);
+                ctx3.fillRect(-15, -15, 30, 30);
+                ctx3.restore();
+            }
+
+            init();
+        </script>
+     
+  
+    
+    
+
 <script src="canvas_lines_sphere_data/three.js"></script>
 
 <link href="StyleSheet2.css" rel="stylesheet" />   
@@ -50,7 +146,7 @@
     }
     div.canvas-content{
         position:relative;
-        z-index:2000;
+        z-index:2;
         color:#fff;
         text-align:center;
         padding-top:30px;
